@@ -34,4 +34,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: build/cardano-wallet-*
+          files: |
+            build/cardano-wallet-macos-latest
+            build/cardano-wallet-ubuntu-latest
+            build/cardano-wallet-windows-latest
