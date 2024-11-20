@@ -21,25 +21,8 @@ jobs:
           deno-version: v2.x # Run with latest stable Deno.
       - name: Compile step
         run: "deno compile --allow-read --allow-write --output build/cardano-wallet-${{ matrix.platform }} ./src/mod.ts"
-      - name: debug
-        run: "ls -al && ls -al build"
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: build/cardano-wallet-${{ matrix.platform }}
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: cardano-wallet-${{ matrix.platform }}
-      #     path: build/cardano-wallet-*
-
-  # release:
-  #   needs: ["build-and-compile"]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Release
-  #       uses: softprops/action-gh-release@v2
-  #       if: startsWith(github.ref, 'refs/tags/')
-  #       with:
-  #         files: |
-  #           build/cardano-wallet-*
