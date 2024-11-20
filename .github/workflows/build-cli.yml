@@ -1,0 +1,28 @@
+name: build-cli
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Needed for auth with Deno Deploy
+  contents: read # Needed to clone the repository
+
+jobs:
+  build-and-publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x # Run with latest stable Deno.
+      - name: Compile step
+        working-directory: core/cli/
+        run: "deno compile --allow-read --allow-write --output build/cardano-wallet-${{ matrix.platform }} ./src/mod.ts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cardano-wallet-${{ matrix.platform }}
+          path: /build/cardano-wallet-*
