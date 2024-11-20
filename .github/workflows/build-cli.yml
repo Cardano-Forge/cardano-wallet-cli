@@ -24,4 +24,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: cardano-wallet-${{ matrix.platform }}
-          path: /build/cardano-wallet-*
+          path: build/cardano-wallet-*
