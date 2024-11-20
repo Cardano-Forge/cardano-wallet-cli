@@ -105,10 +105,10 @@ export function createOrRestoreWalletMnemonic(
 		.derive(harden(1815)) // coin type
 		.derive(harden(0)); // account #0
 
-	const utxoPubKey = accountKey
+	const utxoPrivKey = accountKey
 		.derive(0) // external
-		.derive(0)
-		.to_public();
+		.derive(0);
+	const utxoPubKey = utxoPrivKey.to_public();
 
 	const stakeKey = accountKey
 		.derive(2) // chimeric
@@ -149,8 +149,8 @@ export function createOrRestoreWalletMnemonic(
 	);
 
 	const wallet = {
-		skey: rootKey.to_raw_key().to_bech32(),
-		skey_hex: rootKey.to_raw_key().to_hex(),
+		skey: utxoPrivKey.to_raw_key().to_bech32(),
+		skey_hex: utxoPrivKey.to_raw_key().to_hex(),
 		pkey: utxoPubKey.to_raw_key().to_bech32(),
 		pkey_hex: utxoPubKey.to_raw_key().to_hex(), // Represent the hex that is save in ogmios transaction/signatories, useful to scan the chain searching for tx signed by this address.
 		key_hash: utxoPubKey.to_raw_key().hash().to_hex(),
