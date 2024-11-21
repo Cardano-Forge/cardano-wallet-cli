@@ -47,9 +47,9 @@ export function createWallet(
 	pkey: string;
 	pkey_hex: string;
 	key_hash: string;
-	address_preview: string;
-	address_preprod: string;
-	address_mainnet: string;
+	enterprise_address_preview: string;
+	enterprise_address_preprod: string;
+	enterprise_address_mainnet: string;
 } {
 	const privateKey = PrivateKey.generate_ed25519();
 	// Derive the public key
@@ -76,9 +76,15 @@ export function createWallet(
 		pkey: publicKey.to_bech32(),
 		pkey_hex: publicKey.to_hex(), // Represent the hex that is save in ogmios transaction/signatories, useful to scan the chain searching for tx signed by this address.
 		key_hash: keyHash.to_hex(),
-		address_preview: enterpriseAddressPreview.to_address().to_bech32(),
-		address_preprod: enterpriseAddressPreprod.to_address().to_bech32(),
-		address_mainnet: enterpriseAddressMainnet.to_address().to_bech32(),
+		enterprise_address_preview: enterpriseAddressPreview
+			.to_address()
+			.to_bech32(),
+		enterprise_address_preprod: enterpriseAddressPreprod
+			.to_address()
+			.to_bech32(),
+		enterprise_address_mainnet: enterpriseAddressMainnet
+			.to_address()
+			.to_bech32(),
 	};
 
 	saveWallet(wallet, filename, save_locally);
@@ -158,9 +164,11 @@ export function createOrRestoreWalletMnemonic(
 		base_address_preprod: baseAddrTestnet.to_address().to_bech32(),
 		base_address_mainnet: baseAddr.to_address().to_bech32(),
 		enterprise_address_mainnet: enterpriseAddr.to_address().to_bech32(),
-		enterprise_address_testnet: enterpriseAddrTestnet.to_address().to_bech32(),
+		enterprise_address_preview: enterpriseAddrTestnet.to_address().to_bech32(),
+		enterprise_address_preprod: enterpriseAddrTestnet.to_address().to_bech32(),
 		reward_address_mainnet: rewardAddr.to_address().to_bech32(),
-		reward_address_testnet: rewardAddrTestnet.to_address().to_bech32(),
+		reward_address_preview: rewardAddrTestnet.to_address().to_bech32(),
+		reward_address_preprod: rewardAddrTestnet.to_address().to_bech32(),
 		mnemonic,
 	};
 

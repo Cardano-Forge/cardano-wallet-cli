@@ -10,7 +10,7 @@ This tool allows to quickly generate wallets, the goal is to streamline our test
 **Create binary**
 
 ```bash
-deno compile --allow-read --allow-write cardano-wallet.ts
+deno compile --allow-read --allow-write --output cardano-wallet src/mod.ts
 ```
 
 **Creating enterprise Wallet (No staking)**
