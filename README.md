@@ -23,12 +23,18 @@ deno compile --allow-read --allow-write --output cardano-wallet src/mod.ts
 ./cardano-wallet --name=meta-manager
 ```
 
-**Creating mnemonic Wallet (With staking)**
+**Creating mnemonic Wallet (24 words seed phrase) (With staking)**
 
 > Allows to get the key to sign without human interaction AND imports the mnenomic in a wallet extension.
 
 ```bash
 ./cardano-wallet --name=wallet-1 --mnemonic
+```
+
+**12 words seed phrase**
+
+```bash
+./cardano-wallet --name=wallet-1 --mnemonic --bits=128
 ```
 
 **Restoring mnemonic Wallet (With staking)**
