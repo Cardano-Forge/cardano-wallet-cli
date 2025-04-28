@@ -1,3 +1,4 @@
 cardano-wallet
 *.json
 build/
+.DS_Store

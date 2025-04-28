@@ -7,7 +7,7 @@ import {
   NetworkInfo,
   PrivateKey,
   RewardAddress,
-} from "npm:@emurgo/cardano-serialization-lib-nodejs@13.2.0";
+} from "npm:@emurgo/cardano-serialization-lib-nodejs@14.1.1";
 import { generateMnemonic, mnemonicToEntropy } from "npm:bip39";
 import { parseArgs } from "jsr:@std/cli/parse-args";
 import { existsSync } from "jsr:@std/fs";
@@ -18,6 +18,7 @@ const args: {
   mnemonic: boolean;
   seed: string;
   bits: number;
+  password: string
 
 } = parseArgs(Deno.args);
 
@@ -98,41 +99,45 @@ export function createOrRestoreWalletMnemonic(
   filename: string,
   save_locally = false,
   mnemonic = generateMnemonic(256), // Restore or Create new one
+  password = ""
 ) {
   const rootKey = Bip32PrivateKey.from_bip39_entropy(
     Buffer.from(mnemonicToEntropy(mnemonic), "hex"),
-    Buffer.from(""),
+    Buffer.from(password),
   );
 
   function harden(num: number): number {
     return 0x80000000 + num;
   }
 
+  const accountIndex = 0;
+  const walletIndex = 0;
+
   const accountKey = rootKey
     .derive(harden(1852)) // purpose
     .derive(harden(1815)) // coin type
-    .derive(harden(0)); // account #0
+    .derive(harden(accountIndex)); // account index
 
   const utxoPrivKey = accountKey
-    .derive(0) // external
-    .derive(0);
+    .derive(0) // role - external
+    .derive(walletIndex); // index
   const utxoPubKey = utxoPrivKey.to_public();
 
-  const stakeKey = accountKey
-    .derive(2) // chimeric
-    .derive(0)
-    .to_public();
+  const stakePrivKey = accountKey
+    .derive(2) // role - staking
+    .derive(walletIndex) // index
+  const stakePubKey = stakePrivKey.to_public();
 
   // base address with staking key
   const baseAddr = BaseAddress.new(
     NetworkInfo.mainnet().network_id(),
     Credential.from_keyhash(utxoPubKey.to_raw_key().hash()),
-    Credential.from_keyhash(stakeKey.to_raw_key().hash()),
+    Credential.from_keyhash(stakePubKey.to_raw_key().hash()),
   );
   const baseAddrTestnet = BaseAddress.new(
     NetworkInfo.testnet_preprod().network_id(),
     Credential.from_keyhash(utxoPubKey.to_raw_key().hash()),
-    Credential.from_keyhash(stakeKey.to_raw_key().hash()),
+    Credential.from_keyhash(stakePubKey.to_raw_key().hash()),
   );
 
   // enterprise address without staking ability, for use by exchanges/etc
@@ -149,19 +154,22 @@ export function createOrRestoreWalletMnemonic(
   // reward address - used for withdrawing accumulated staking rewards
   const rewardAddr = RewardAddress.new(
     NetworkInfo.mainnet().network_id(),
-    Credential.from_keyhash(stakeKey.to_raw_key().hash()),
+    Credential.from_keyhash(stakePubKey.to_raw_key().hash()),
   );
   const rewardAddrTestnet = RewardAddress.new(
     NetworkInfo.testnet_preprod().network_id(),
-    Credential.from_keyhash(stakeKey.to_raw_key().hash()),
+    Credential.from_keyhash(stakePubKey.to_raw_key().hash()),
   );
 
   const wallet = {
+    stake_skey: stakePrivKey.to_raw_key().to_bech32(),
+    stake_skey_hex: stakePrivKey.to_raw_key().to_hex(),
     skey: utxoPrivKey.to_raw_key().to_bech32(),
     skey_hex: utxoPrivKey.to_raw_key().to_hex(),
     pkey: utxoPubKey.to_raw_key().to_bech32(),
     pkey_hex: utxoPubKey.to_raw_key().to_hex(), // Represent the hex that is save in ogmios transaction/signatories, useful to scan the chain searching for tx signed by this address.
     key_hash: utxoPubKey.to_raw_key().hash().to_hex(),
+    stake_key_hash: stakePubKey.to_raw_key().hash().to_hex(),
     base_address_preview: baseAddrTestnet.to_address().to_bech32(),
     base_address_preprod: baseAddrTestnet.to_address().to_bech32(),
     base_address_mainnet: baseAddr.to_address().to_bech32(),
@@ -181,10 +189,10 @@ export function createOrRestoreWalletMnemonic(
 
 if (args.seed && args.seed.length > 0) {
   console.log("Restoring wallet using seedphrase");
-  createOrRestoreWalletMnemonic(args.name, true, args.seed);
+  createOrRestoreWalletMnemonic(args.name, true, args.seed, args.password);
 } else if (args.mnemonic) {
   console.log("Creating wallet with seedphrase (Default 24 words)");
-  createOrRestoreWalletMnemonic(args.name, true, generateMnemonic(args.bits || 256));
+  createOrRestoreWalletMnemonic(args.name, true, generateMnemonic(args.bits || 256), args.password);
 } else {
   console.log("Creating Enterprise wallet (No staking)");
   createWallet(args.name, true);

@@ -44,3 +44,9 @@ deno compile --allow-read --allow-write --output cardano-wallet src/mod.ts
 ```bash
 ./cardano-wallet --name=wallet-2 --mnemonic --seed="beef swamp swing original fresh acquire virus hub essay welcome nut spray"
 ```
+
+**Add a Password**
+
+```bash
+./cardano-wallet --name=wallet-3 --mnemonic --password=helloworld
+```
